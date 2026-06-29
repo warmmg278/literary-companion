@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>마음산책</title>
+
+    <!-- Pretendard -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+    <!-- Gowun Batang -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<h1>📖 마음산책</h1>
+
+<p>
+오늘의 장면을 문학의 언어로 기억해보세요.
+</p>
+
+</header>
+
+
+<!-- ============================= -->
+<!-- 시적 이미지 -->
+<!-- ============================= -->
+
+<div class="card">
+
+<form action="/image" method="post">
+
+<h3>😊 오늘의 감정</h3>
+
+<input
+type="text"
+name="emotion"
+placeholder="예) 설렘, 공허함, 기대"
+required>
+
+<h3>🌇 오늘 가장 인상 깊었던 장면</h3>
+
+<textarea
+name="scene"
+rows="4"
+placeholder="오늘 가장 오래 기억에 남은 장면을 적어주세요."
+required></textarea>
+
+<button id="imageBtn" type="submit">
+
+🖼 시적 이미지 추출
+
+</button>
+
+</form>
+
+<div id="imageCard" class="result" style="display:none;">
+
+<h3>🖼 시적 이미지</h3>
+
+<div id="imageResult"></div>
+
+</div>
+
+</div>
+
+
+
+<!-- ============================= -->
+<!-- 피드백 -->
+<!-- ============================= -->
+
+<div class="card">
+
+<form action="/feedback" method="post">
+
+<h3>✍ 창작물</h3>
+
+<textarea
+name="writing"
+rows="8"
+placeholder="창작한 글을 입력하세요."
+required></textarea>
+
+<button id="feedbackBtn" type="submit">
+
+📝 피드백 받기
+
+</button>
+
+</form>
+
+<div id="feedbackCard" class="result" style="display:none;">
+
+<h3>📝 AI 피드백</h3>
+
+<div id="feedbackResult"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+function typeWriter(element, text){
+
+    element.innerHTML = "";
+
+    let i = 0;
+
+    const timer = setInterval(()=>{
+
+        element.innerHTML += text.charAt(i);
+
+        i++;
+
+        if(i >= text.length){
+
+            clearInterval(timer);
+
+        }
+
+    },8);
+
+}
+
+
+
+// ---------------- Image ----------------
+
+const imageForm = document.querySelector('form[action="/image"]');
+const imageBtn = document.getElementById("imageBtn");
+
+imageForm.addEventListener("submit", async(e)=>{
+
+    e.preventDefault();
+
+    imageBtn.disabled = true;
+    imageBtn.innerText = "🖋️ 시적 이미지를 떠올리는 중...";
+
+    const formData = new FormData(imageForm);
+
+    const response = await fetch("/image",{
+        method:"POST",
+        body:formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("imageCard").style.display="block";
+
+    document.getElementById("imageCard").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+    });
+
+    typeWriter(
+        document.getElementById("imageResult"),
+        data.result
+    );
+
+    imageBtn.disabled = false;
+    imageBtn.innerText = "🖼 시적 이미지 추출";
+
+});
+
+
+
+
+// ---------------- Feedback ----------------
+
+const feedbackForm = document.querySelector('form[action="/feedback"]');
+const feedbackBtn = document.getElementById("feedbackBtn");
+
+feedbackForm.addEventListener("submit", async(e)=>{
+
+    e.preventDefault();
+
+    feedbackBtn.disabled = true;
+    feedbackBtn.innerText = "📚 창작물을 읽는 중...";
+
+    const formData = new FormData(feedbackForm);
+
+    const response = await fetch("/feedback",{
+        method:"POST",
+        body:formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("feedbackCard").style.display="block";
+
+    document.getElementById("feedbackCard").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+    });
+
+    typeWriter(
+        document.getElementById("feedbackResult"),
+        data.result
+    );
+
+    feedbackBtn.disabled = false;
+    feedbackBtn.innerText = "📝 피드백 받기";
+
+});
+
+</script>
+
+</body>
+
+</html>
